@@ -3,95 +3,395 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Message Encryption Tool</title>
+    <title>Enterprise Stealth Encryption Tool - Ultra Secure</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+        :root {
+            --primary-color: #721c24; 
+            --secondary-color: #0c5460; 
+            --clear-color: #383d41; 
+            --copy-color: #155724; 
+            --border-color: #f39c12;
+            --container-width: 1300px;
         }
-        #decryptedMessageSection {
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            border: 2px solid var(--border-color);
+            padding: 50px;
+            width: 98%; 
+            max-width: var(--container-width);
+            background-color: white;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            border-radius: 12px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 60px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 40px;
+        }
+
+        .tab {
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            color: #666;
+            transition: 0.3s;
+        }
+
+        .tab.active {
+            color: #000;
+            border-bottom: 4px solid #4a1a1a;
+        }
+
+        .main-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #222;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 20px;
+            border: 1.5px solid #ced4da;
+            border-radius: 8px;
+            resize: both;
+            box-sizing: border-box;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .controls {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .pass-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        input[type="password"], input[type="text"] {
+            padding: 15px;
+            border: 2px solid #333;
+            width: 220px;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        input[readonly] { background-color: #f1f3f5; cursor: not-allowed; border-color: #ccc; }
+
+        /* Switch UI */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 30px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 22px; width: 22px;
+            left: 4px; bottom: 4px; background-color: white;
+            transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #4a1a1a; }
+        input:checked + .slider:before { transform: translateX(30px); }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .btn-clear { background-color: var(--clear-color); }
+        .btn-encrypt { background-color: var(--primary-color); }
+        .btn-decrypt { background-color: var(--secondary-color); }
+        .btn-copy { background-color: var(--copy-color); }
+
+        #status-bar {
+            margin-top: 30px;
+            padding: 15px;
             display: none;
-            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 8px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
 
-<h1>Message Encryption Tool</h1>
+<div class="container">
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('text')">📝 Text</div>
+        <div class="tab" onclick="switchTab('image')">🖼️ Image</div>
+        <div class="tab" onclick="switchTab('audio')">🔊 Audio</div>
+    </div>
 
-<label for="message">Enter your confidential message:</label><br>
-<textarea id="message" rows="4" cols="50"></textarea><br><br>
+    <div id="textTabContent">
+        <div class="main-section">
+            <div class="input-group">
+                <label>Enter any text to be Encrypted:</label>
+                <textarea id="plainText" placeholder="আপনার মূল মেসেজটি এখানে লিখুন..."></textarea>
+            </div>
+            <div class="input-group">
+                <label>Enter Encrypted Text to Decrypt:</label>
+                <textarea id="encryptedText" placeholder="এনক্রিপ্টেড কোডটি এখানে পেস্ট করুন..." oninput="checkEncryptedBox()"></textarea>
+            </div>
+        </div>
 
-<label for="pin">Enter a PIN (4 digits):</label><br>
-<input type="password" id="pin" maxlength="4"><br><br>
+        <div class="controls">
+            <div class="pass-container">
+                <span><strong>Password:</strong></span>
+                <input type="password" id="password" placeholder="Strong PIN/Pass">
+                
+                <span><strong>Hint:</strong></span>
+                <input type="text" id="hintInput" placeholder="Password Hint">
 
-<button onclick="encryptMessage()">Encrypt Message</button>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span><strong>Show Hint</strong></span>
+                    <label class="switch">
+                        <input type="checkbox" id="hintToggle" onchange="toggleHintView()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
 
-<div id="encryptedMessageSection">
-    <h2>Encrypted Message:</h2>
-    <textarea id="encryptedOutput" rows="4" cols="50" readonly></textarea><br>
-    <button onclick="copyEncryptedMessage()">Copy Encrypted Message</button><br><br>
+            <div class="btn-group">
+                <button class="btn-clear" onclick="clearAll()">🗑️ Clear All</button>
+                <button class="btn-encrypt" onclick="processText('encrypt')">🔒 Secure Encrypt</button>
+                <button class="btn-decrypt" onclick="processText('decrypt')">🔓 Secure Decrypt</button>
+                <button class="btn-copy" onclick="copyResult()">📋 Copy Result</button>
+            </div>
+        </div>
+    </div>
 
-    <label for="decryptInput">Paste the encrypted message here:</label><br>
-    <textarea id="decryptInput" rows="4" cols="50"></textarea><br><br>
+    <div id="otherTabContent" style="display:none; text-align:center; padding: 100px;">
+        <h2>Feature Coming Soon...</h2>
+        <p>আমরা বর্তমানে ইমেজ এবং অডিও এনক্রিপশন নিয়ে কাজ করছি।</p>
+    </div>
 
-    <label for="decryptPin">Enter PIN to decrypt:</label><br>
-    <input type="password" id="decryptPin" maxlength="4"><br><br>
-    <button onclick="decryptMessage()">Decrypt Message</button>
-
-    <h2>Decrypted Message:</h2>
-    <textarea id="decryptedOutput" rows="4" cols="50" readonly></textarea><br>
-    <button onclick="copyDecryptedMessage()">Copy Decrypted Message</button>
+    <div id="status-bar"></div>
 </div>
 
+<audio id="notifySound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+
 <script>
-    let encryptedData = '';
+    let isWrongPasswordEntered = false;
+    let extractedHint = "";
 
-    function encryptMessage() {
-        const message = document.getElementById('message').value;
-        const pin = document.getElementById('pin').value;
+    function switchTab(tabName) {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        event.currentTarget.classList.add('active');
 
-        if (pin.length !== 4) {
-            alert("Please enter a 4-digit PIN.");
+        if(tabName === 'text') {
+            document.getElementById('textTabContent').style.display = 'block';
+            document.getElementById('otherTabContent').style.display = 'none';
+        } else {
+            document.getElementById('textTabContent').style.display = 'none';
+            document.getElementById('otherTabContent').style.display = 'block';
+        }
+    }
+
+    function checkEncryptedBox() {
+        const encryptedText = document.getElementById('encryptedText').value.trim();
+        const hintInput = document.getElementById('hintInput');
+        hintInput.readOnly = encryptedText !== "";
+    }
+
+    // --- উন্নত নিরাপত্তা লজিক ---
+    function processText(action) {
+        const plainTextField = document.getElementById('plainText');
+        const encryptedTextField = document.getElementById('encryptedText');
+        const passwordField = document.getElementById('password');
+        const hintInput = document.getElementById('hintInput');
+        const sound = document.getElementById('notifySound');
+
+        if (!passwordField.value) {
+            showStatus("Password is required!", "#fff3cd", "#856404");
             return;
         }
 
-        // Simple encryption by base64 encoding the message and appending the PIN
-        encryptedData = btoa(message + '|' + pin); // Base64 encoding
-        document.getElementById('encryptedOutput').value = encryptedData;
-        document.getElementById('encryptedMessageSection').style.display = 'block';
-    }
-
-    function copyEncryptedMessage() {
-        const output = document.getElementById('encryptedOutput');
-        output.select();
-        document.execCommand('copy');
-        alert("Encrypted message copied to clipboard!");
-    }
-
-    function decryptMessage() {
-        const decryptInput = document.getElementById('decryptInput').value;
-        const decryptPin = document.getElementById('decryptPin').value;
-
         try {
-            const decodedData = atob(decryptInput);
-            const [message, pin] = decodedData.split('|');
+            if (action === 'encrypt') {
+                const text = plainTextField.value;
+                const hintText = hintInput.value || "#####";
+                if (!text) return;
 
-            if (decryptPin === pin) {
-                document.getElementById('decryptedOutput').value = message;
-            } else {
-                alert("Incorrect PIN. Unable to decrypt.");
+                // ১. Salt এবং IV জেনারেশন (প্রতিটি এনক্রিপশনকে ইউনিক করার জন্য)
+                const salt = CryptoJS.lib.WordArray.random(128/8);
+                const iv = CryptoJS.lib.WordArray.random(128/8);
+
+                // ২. PBKDF2 কী ডেরিভেশন (ব্রুট-ফোর্স প্রোটেকশন)
+                const key = CryptoJS.PBKDF2(passwordField.value, salt, {
+                    keySize: 256/32,
+                    iterations: 1000
+                });
+
+                // ৩. AES-256 এনক্রিপশন (CBC Mode)
+                const encrypted = CryptoJS.AES.encrypt(text, key, { 
+                    iv: iv, 
+                    padding: CryptoJS.pad.Pkcs7,
+                    mode: CryptoJS.mode.CBC 
+                });
+
+                // ৪. আউটপুট ফরম্যাট: [Salt(32chars)][IV(32chars)][Ciphertext].[EncodedHint]
+                const transitValue = salt.toString() + iv.toString() + encrypted.toString();
+                const encodedHint = btoa(unescape(encodeURIComponent(hintText)));
+                
+                encryptedTextField.value = transitValue + "." + encodedHint;
+                showStatus("Encryption successfully completed!", "#d4edda", "#155724");
+                sound.play();
+                checkEncryptedBox();
+            } 
+            else if (action === 'decrypt') {
+                const fullText = encryptedTextField.value.trim();
+                if (!fullText) return;
+
+                const parts = fullText.split(".");
+                const combinedData = parts[0];
+                const encodedHint = parts[1] || "";
+
+                try {
+                    // ৫. ডেটা স্ট্রাকচার থেকে Salt, IV এবং Cipher আলাদা করা
+                    const salt = CryptoJS.enc.Hex.parse(combinedData.substr(0, 32));
+                    const iv = CryptoJS.enc.Hex.parse(combinedData.substr(32, 32));
+                    const cipherText = combinedData.substring(64);
+
+                    // ৬. একই প্যারামিটারে কী তৈরি
+                    const key = CryptoJS.PBKDF2(passwordField.value, salt, {
+                        keySize: 256/32,
+                        iterations: 1000
+                    });
+
+                    const decrypted = CryptoJS.AES.decrypt(cipherText, key, { 
+                        iv: iv, 
+                        padding: CryptoJS.pad.Pkcs7,
+                        mode: CryptoJS.mode.CBC 
+                    });
+
+                    const plainText = decrypted.toString(CryptoJS.enc.Utf8);
+
+                    if (plainText) {
+                        plainTextField.value = plainText;
+                        showStatus("Decryption successfully completed!", "#d4edda", "#155724");
+                        isWrongPasswordEntered = false;
+                        extractedHint = ""; 
+                        sound.play();
+                    } else { throw new Error(); }
+                } catch (err) {
+                    isWrongPasswordEntered = true;
+                    sound.play();
+                    showStatus("Invalid Password", "#f8d7da", "#721c24");
+                    
+                    // আপনার মূল হিন্ট লজিক
+                    if (encodedHint) {
+                        try { extractedHint = decodeURIComponent(escape(atob(encodedHint))); } 
+                        catch(e) { extractedHint = "#####"; }
+                    } else { extractedHint = "#####"; }
+                }
             }
-        } catch (e) {
-            alert("Decryption failed. Please ensure you have entered the correct encrypted message.");
+        } catch (e) { showStatus("Operation Failed", "#f8d7da", "#721c24"); }
+    }
+
+    function toggleHintView() {
+        const toggle = document.getElementById('hintToggle');
+        const hintDisplay = document.getElementById('hintInput');
+
+        if (toggle.checked) {
+            if (isWrongPasswordEntered && extractedHint !== "") {
+                hintDisplay.value = extractedHint;
+                setTimeout(() => {
+                    toggle.checked = false;
+                    hintDisplay.value = "";
+                }, 3000);
+            } else {
+                toggle.checked = false;
+            }
+        } else {
+            hintDisplay.value = "";
         }
     }
 
-    function copyDecryptedMessage() {
-        const decryptedOutput = document.getElementById('decryptedOutput');
-        decryptedOutput.select();
-        document.execCommand('copy');
-        alert("Decrypted message copied to clipboard!");
+    function showStatus(msg, bgColor, textColor) {
+        const statusBar = document.getElementById('status-bar');
+        statusBar.innerText = msg;
+        statusBar.style.backgroundColor = bgColor;
+        statusBar.style.color = textColor;
+        statusBar.style.display = 'block';
+        setTimeout(() => { statusBar.style.display = 'none'; }, 4000);
+    }
+
+    function clearAll() {
+        document.getElementById('plainText').value = '';
+        document.getElementById('encryptedText').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('hintInput').value = '';
+        document.getElementById('hintInput').readOnly = false;
+        document.getElementById('hintToggle').checked = false;
+        isWrongPasswordEntered = false;
+        extractedHint = "";
+    }
+
+    function copyResult() {
+        const encryptedText = document.getElementById('encryptedText');
+        if (encryptedText.value) {
+            encryptedText.select();
+            document.execCommand('copy');
+            showStatus("Copied to clipboard!", "#d1ecf1", "#0c5460");
+        }
     }
 </script>
 
