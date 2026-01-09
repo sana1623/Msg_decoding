@@ -3,12 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Stealth Encryption Tool - Multi-Module</title>
+    <title>Enterprise Stealth Encryption Tool - Ultra Secure</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
         :root {
             --primary-color: #721c24; 
@@ -22,28 +18,30 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
         }
 
-        .main-container {
+        .container {
             border: 2px solid var(--border-color);
-            padding: 40px;
+            padding: 50px;
             width: 98%; 
             max-width: var(--container-width);
             background-color: white;
             box-shadow: 0 15px 40px rgba(0,0,0,0.2);
             border-radius: 12px;
-            margin: auto;
         }
 
         .tabs {
             display: flex;
-            gap: 40px;
+            gap: 60px;
             border-bottom: 2px solid #eee;
             padding-bottom: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .tab {
@@ -51,381 +49,349 @@
             font-weight: bold;
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 20px;
+            gap: 12px;
+            font-size: 22px;
             color: #666;
             transition: 0.3s;
-            padding: 5px 15px;
         }
 
         .tab.active {
             color: #000;
-            border-bottom: 4px solid var(--primary-color);
+            border-bottom: 4px solid #4a1a1a;
         }
 
-        /* Text Section Styling */
-        .text-section-grid {
+        .main-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            gap: 40px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #222;
         }
 
         textarea {
             width: 100%;
-            min-height: 250px;
-            padding: 15px;
+            min-height: 300px;
+            padding: 20px;
             border: 1.5px solid #ced4da;
             border-radius: 8px;
+            resize: both;
+            box-sizing: border-box;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .controls {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .pass-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        input[type="password"], input[type="text"] {
+            padding: 15px;
+            border: 2px solid #333;
+            width: 220px;
+            border-radius: 6px;
             font-size: 16px;
         }
 
-        /* Image Section Styling (Nested) */
-        #imageTabContent {
-            background-color: #0f172a;
-            color: #e2e8f0;
-            border-radius: 12px;
-            padding: 20px;
+        input[readonly] { background-color: #f1f3f5; cursor: not-allowed; border-color: #ccc; }
+
+        /* Switch UI */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
         }
-        .glass-card { background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; border-radius: 12px; }
-        .fixed-preview {
-            width: 100%; height: 300px; 
-            background: #020617; display: flex; align-items: center; justify-content: center;
-            border-radius: 8px; border: 1px dashed #334155; overflow: hidden;
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 30px;
         }
-        .fixed-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .thumb-mini { width: 45px; height: 45px; border: 1px solid #475569; border-radius: 4px; overflow: hidden; cursor: pointer; }
+        .slider:before {
+            position: absolute; content: ""; height: 22px; width: 22px;
+            left: 4px; bottom: 4px; background-color: white;
+            transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #4a1a1a; }
+        input:checked + .slider:before { transform: translateX(30px); }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .btn-clear { background-color: var(--clear-color); }
+        .btn-encrypt { background-color: var(--primary-color); }
+        .btn-decrypt { background-color: var(--secondary-color); }
+        .btn-copy { background-color: var(--copy-color); }
 
         #status-bar {
-            margin-top: 20px;
-            padding: 10px;
+            margin-top: 30px;
+            padding: 15px;
             display: none;
             text-align: center;
             font-weight: bold;
             border-radius: 8px;
+            font-size: 18px;
         }
-        
-        .progress-container { width: 100%; background: #1e293b; border-radius: 10px; height: 8px; overflow: hidden; border: 1px solid #334155; }
-        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); transition: width 0.1s linear; }
     </style>
 </head>
 <body>
 
-<div class="main-container">
+<div class="container">
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('text')">📝 Text Module</div>
-        <div class="tab" onclick="switchTab('image')">🖼️ Image Module</div>
-        <div class="tab" onclick="switchTab('audio')">🔊 Audio Module</div>
+        <div class="tab active" onclick="switchTab('text')">📝 Text</div>
+        <div class="tab" onclick="switchTab('image')">🖼️ Image</div>
+        <div class="tab" onclick="switchTab('audio')">🔊 Audio</div>
     </div>
 
     <div id="textTabContent">
-        <div class="text-section-grid">
-            <div>
-                <label class="font-bold block mb-2 text-gray-700">Enter Plain Text:</label>
+        <div class="main-section">
+            <div class="input-group">
+                <label>Enter any text to be Encrypted:</label>
                 <textarea id="plainText" placeholder="আপনার মূল মেসেজটি এখানে লিখুন..."></textarea>
             </div>
-            <div>
-                <label class="font-bold block mb-2 text-gray-700">Encrypted Code:</label>
+            <div class="input-group">
+                <label>Enter Encrypted Text to Decrypt:</label>
                 <textarea id="encryptedText" placeholder="এনক্রিপ্টেড কোডটি এখানে পেস্ট করুন..." oninput="checkEncryptedBox()"></textarea>
             </div>
         </div>
 
-        <div class="mt-8 text-center">
-            <div class="flex justify-center items-center gap-6 mb-6 flex-wrap">
-                <input type="password" id="textPass" placeholder="Password PIN" class="p-3 border-2 border-gray-800 rounded w-52">
-                <input type="text" id="textHint" placeholder="Hint" class="p-3 border-2 border-gray-800 rounded w-52">
-                <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold">Show Hint</span>
-                    <input type="checkbox" id="textHintToggle" onchange="toggleTextHint()">
+        <div class="controls">
+            <div class="pass-container">
+                <span><strong>Password:</strong></span>
+                <input type="password" id="password" placeholder="Strong PIN/Pass">
+                
+                <span><strong>Hint:</strong></span>
+                <input type="text" id="hintInput" placeholder="Password Hint">
+
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span><strong>Show Hint</strong></span>
+                    <label class="switch">
+                        <input type="checkbox" id="hintToggle" onchange="toggleHintView()">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
 
-            <div class="flex justify-center gap-4 flex-wrap">
-                <button onclick="clearTextAll()" class="bg-gray-600 text-white px-6 py-3 rounded font-bold hover:opacity-90">🗑️ Clear</button>
-                <button onclick="processTextModule('encrypt')" class="bg-red-800 text-white px-6 py-3 rounded font-bold hover:opacity-90">🔒 Encrypt</button>
-                <button onclick="processTextModule('decrypt')" class="bg-cyan-900 text-white px-6 py-3 rounded font-bold hover:opacity-90">🔓 Decrypt</button>
-                <button onclick="copyTextResult()" class="bg-green-800 text-white px-6 py-3 rounded font-bold hover:opacity-90">📋 Copy</button>
-            </div>
-            <div id="status-bar"></div>
-        </div>
-    </div>
-
-    <div id="imageTabContent" style="display:none;">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div class="lg:col-span-7 space-y-6">
-                <div class="glass-card p-6 border-l-4 border-blue-500 shadow-xl">
-                    <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
-                        <h2 class="text-xl font-bold text-blue-400 flex items-center gap-2"><i class="fas fa-lock"></i> Image Encryptor</h2>
-                        <span id="encCount" class="bg-slate-800 text-blue-400 px-3 py-1 rounded-full text-xs border border-slate-600">Files: 0</span>
-                    </div>
-                    <input type="file" id="encInput" accept="image/*" multiple class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-600 file:text-white cursor-pointer mb-4">
-                    <div id="fileList" class="bg-slate-900/50 p-2 h-32 overflow-y-auto rounded mb-4 text-xs"></div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <input type="password" id="imgEncPass" placeholder="Password" class="bg-slate-800 border border-slate-600 rounded p-2 text-sm outline-none">
-                        <input type="text" id="imgEncHint" placeholder="Hint" class="bg-slate-800 border border-slate-600 rounded p-2 text-sm outline-none">
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="processFiles(true)" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-xs font-bold flex-1">Encrypt Images</button>
-                        <button id="downloadEncZip" class="bg-slate-700 text-slate-400 px-4 py-2 rounded text-xs font-bold flex-1" disabled>Download Zip</button>
-                    </div>
-                </div>
-
-                <div class="glass-card p-6 border-l-4 border-green-500 shadow-xl">
-                    <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
-                        <h2 class="text-xl font-bold text-green-400 flex items-center gap-2"><i class="fas fa-unlock"></i> Image Decryptor</h2>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px]">HINT</span>
-                            <input type="checkbox" id="imgHintToggle" disabled onclick="toggleImgHints()">
-                            <span id="decCount" class="bg-slate-800 text-green-400 px-3 py-1 rounded-full text-xs border border-slate-600">Files: 0</span>
-                        </div>
-                    </div>
-                    <input type="file" id="decInput" accept=".enc" multiple class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-green-600 file:text-white cursor-pointer mb-4">
-                    <div id="decFileList" class="bg-slate-900/50 p-2 h-32 overflow-y-auto rounded mb-4 text-xs"></div>
-                    <input type="password" id="imgDecPass" placeholder="Password" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm outline-none mb-4">
-                    <div class="flex gap-2">
-                        <button onclick="processFiles(false)" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded text-xs font-bold flex-1">Decrypt Images</button>
-                        <button id="downloadDecZip" class="bg-slate-700 text-slate-400 px-4 py-2 rounded text-xs font-bold flex-1" disabled>Download Zip</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-5">
-                <div class="glass-card p-4 sticky top-4 h-full">
-                    <h3 class="text-xs text-slate-400 mb-2">Live Preview</h3>
-                    <div id="mainPreview" class="fixed-preview"><p class="text-slate-600">No Image</p></div>
-                    <div class="mt-4">
-                        <div class="flex justify-between text-[10px] mb-1">
-                            <span id="progressText">Status: Idle</span>
-                            <span id="progressPercent">0%</span>
-                        </div>
-                        <div class="progress-container"><div id="progressBar" class="progress-bar"></div></div>
-                    </div>
-                    <div class="mt-6">
-                        <h3 class="text-[10px] font-bold text-slate-500 mb-2">GALLERY PREVIEW</h3>
-                        <div id="galleryGrid" class="flex flex-wrap gap-2 max-h-40 overflow-y-auto"></div>
-                    </div>
-                </div>
+            <div class="btn-group">
+                <button class="btn-clear" onclick="clearAll()">🗑️ Clear All</button>
+                <button class="btn-encrypt" onclick="processText('encrypt')">🔒 Secure Encrypt</button>
+                <button class="btn-decrypt" onclick="processText('decrypt')">🔓 Secure Decrypt</button>
+                <button class="btn-copy" onclick="copyResult()">📋 Copy Result</button>
             </div>
         </div>
     </div>
 
-    <div id="audioTabContent" style="display:none; text-align:center; padding: 50px;">
-        <h2 class="text-2xl font-bold">Audio Module Coming Soon...</h2>
+    <div id="otherTabContent" style="display:none; text-align:center; padding: 100px;">
+        <h2>Feature Coming Soon...</h2>
+        <p>আমরা বর্তমানে ইমেজ এবং অডিও এনক্রিপশন নিয়ে কাজ করছি।</p>
     </div>
+
+    <div id="status-bar"></div>
 </div>
 
 <audio id="notifySound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
 <script>
-    // --- Global Tab Controller ---
+    let isWrongPasswordEntered = false;
+    let extractedHint = "";
+
     function switchTab(tabName) {
         const tabs = document.querySelectorAll('.tab');
         tabs.forEach(t => t.classList.remove('active'));
         event.currentTarget.classList.add('active');
 
-        document.getElementById('textTabContent').style.display = tabName === 'text' ? 'block' : 'none';
-        document.getElementById('imageTabContent').style.display = tabName === 'image' ? 'block' : 'none';
-        document.getElementById('audioTabContent').style.display = tabName === 'audio' ? 'block' : 'none';
+        if(tabName === 'text') {
+            document.getElementById('textTabContent').style.display = 'block';
+            document.getElementById('otherTabContent').style.display = 'none';
+        } else {
+            document.getElementById('textTabContent').style.display = 'none';
+            document.getElementById('otherTabContent').style.display = 'block';
+        }
     }
 
-    // --- TEXT MODULE LOGIC ---
-    let textExtractedHint = "";
-    let isTextWrongPass = false;
+    function checkEncryptedBox() {
+        const encryptedText = document.getElementById('encryptedText').value.trim();
+        const hintInput = document.getElementById('hintInput');
+        hintInput.readOnly = encryptedText !== "";
+    }
 
-    function processTextModule(action) {
-        const plainField = document.getElementById('plainText');
-        const encField = document.getElementById('encryptedText');
-        const pass = document.getElementById('textPass').value;
-        const hintInput = document.getElementById('textHint');
+    // --- উন্নত নিরাপত্তা লজিক ---
+    function processText(action) {
+        const plainTextField = document.getElementById('plainText');
+        const encryptedTextField = document.getElementById('encryptedText');
+        const passwordField = document.getElementById('password');
+        const hintInput = document.getElementById('hintInput');
+        const sound = document.getElementById('notifySound');
 
-        if (!pass) return alert("Password Required");
+        if (!passwordField.value) {
+            showStatus("Password is required!", "#fff3cd", "#856404");
+            return;
+        }
 
         try {
             if (action === 'encrypt') {
-                const text = plainField.value;
+                const text = plainTextField.value;
+                const hintText = hintInput.value || "#####";
                 if (!text) return;
-                const salt = CryptoJS.lib.WordArray.random(16);
-                const key = CryptoJS.PBKDF2(pass, salt, { keySize: 8, iterations: 1000 });
-                const encrypted = CryptoJS.AES.encrypt(text, key, { iv: salt }).toString();
-                const hint = btoa(unescape(encodeURIComponent(hintInput.value || "#####")));
-                encField.value = salt.toString() + encrypted + "." + hint;
-                showStatus("Text Encrypted!", "#d4edda", "#155724");
-            } else {
-                const fullText = encField.value.trim();
+
+                // ১. Salt এবং IV জেনারেশন (প্রতিটি এনক্রিপশনকে ইউনিক করার জন্য)
+                const salt = CryptoJS.lib.WordArray.random(128/8);
+                const iv = CryptoJS.lib.WordArray.random(128/8);
+
+                // ২. PBKDF2 কী ডেরিভেশন (ব্রুট-ফোর্স প্রোটেকশন)
+                const key = CryptoJS.PBKDF2(passwordField.value, salt, {
+                    keySize: 256/32,
+                    iterations: 1000
+                });
+
+                // ৩. AES-256 এনক্রিপশন (CBC Mode)
+                const encrypted = CryptoJS.AES.encrypt(text, key, { 
+                    iv: iv, 
+                    padding: CryptoJS.pad.Pkcs7,
+                    mode: CryptoJS.mode.CBC 
+                });
+
+                // ৪. আউটপুট ফরম্যাট: [Salt(32chars)][IV(32chars)][Ciphertext].[EncodedHint]
+                const transitValue = salt.toString() + iv.toString() + encrypted.toString();
+                const encodedHint = btoa(unescape(encodeURIComponent(hintText)));
+                
+                encryptedTextField.value = transitValue + "." + encodedHint;
+                showStatus("Encryption successfully completed!", "#d4edda", "#155724");
+                sound.play();
+                checkEncryptedBox();
+            } 
+            else if (action === 'decrypt') {
+                const fullText = encryptedTextField.value.trim();
+                if (!fullText) return;
+
                 const parts = fullText.split(".");
-                const salt = CryptoJS.enc.Hex.parse(parts[0].substring(0, 32));
-                const cipher = parts[0].substring(32);
-                const key = CryptoJS.PBKDF2(pass, salt, { keySize: 8, iterations: 1000 });
-                const decrypted = CryptoJS.AES.decrypt(cipher, key, { iv: salt }).toString(CryptoJS.enc.Utf8);
+                const combinedData = parts[0];
+                const encodedHint = parts[1] || "";
 
-                if (decrypted) {
-                    plainField.value = decrypted;
-                    showStatus("Text Decrypted!", "#d4edda", "#155724");
-                } else { throw new Error(); }
+                try {
+                    // ৫. ডেটা স্ট্রাকচার থেকে Salt, IV এবং Cipher আলাদা করা
+                    const salt = CryptoJS.enc.Hex.parse(combinedData.substr(0, 32));
+                    const iv = CryptoJS.enc.Hex.parse(combinedData.substr(32, 32));
+                    const cipherText = combinedData.substring(64);
+
+                    // ৬. একই প্যারামিটারে কী তৈরি
+                    const key = CryptoJS.PBKDF2(passwordField.value, salt, {
+                        keySize: 256/32,
+                        iterations: 1000
+                    });
+
+                    const decrypted = CryptoJS.AES.decrypt(cipherText, key, { 
+                        iv: iv, 
+                        padding: CryptoJS.pad.Pkcs7,
+                        mode: CryptoJS.mode.CBC 
+                    });
+
+                    const plainText = decrypted.toString(CryptoJS.enc.Utf8);
+
+                    if (plainText) {
+                        plainTextField.value = plainText;
+                        showStatus("Decryption successfully completed!", "#d4edda", "#155724");
+                        isWrongPasswordEntered = false;
+                        extractedHint = ""; 
+                        sound.play();
+                    } else { throw new Error(); }
+                } catch (err) {
+                    isWrongPasswordEntered = true;
+                    sound.play();
+                    showStatus("Invalid Password", "#f8d7da", "#721c24");
+                    
+                    // আপনার মূল হিন্ট লজিক
+                    if (encodedHint) {
+                        try { extractedHint = decodeURIComponent(escape(atob(encodedHint))); } 
+                        catch(e) { extractedHint = "#####"; }
+                    } else { extractedHint = "#####"; }
+                }
             }
-        } catch (e) {
-            isTextWrongPass = true;
-            showStatus("Invalid Password", "#f8d7da", "#721c24");
-            const hintPart = encField.value.split(".")[1];
-            textExtractedHint = hintPart ? decodeURIComponent(escape(atob(hintPart))) : "No Hint";
+        } catch (e) { showStatus("Operation Failed", "#f8d7da", "#721c24"); }
+    }
+
+    function toggleHintView() {
+        const toggle = document.getElementById('hintToggle');
+        const hintDisplay = document.getElementById('hintInput');
+
+        if (toggle.checked) {
+            if (isWrongPasswordEntered && extractedHint !== "") {
+                hintDisplay.value = extractedHint;
+                setTimeout(() => {
+                    toggle.checked = false;
+                    hintDisplay.value = "";
+                }, 3000);
+            } else {
+                toggle.checked = false;
+            }
+        } else {
+            hintDisplay.value = "";
         }
     }
 
-    function toggleTextHint() {
-        const toggle = document.getElementById('textHintToggle');
-        const hintInput = document.getElementById('textHint');
-        if (toggle.checked && isTextWrongPass) {
-            hintInput.value = textExtractedHint;
-            setTimeout(() => { toggle.checked = false; hintInput.value = ""; }, 3000);
-        }
+    function showStatus(msg, bgColor, textColor) {
+        const statusBar = document.getElementById('status-bar');
+        statusBar.innerText = msg;
+        statusBar.style.backgroundColor = bgColor;
+        statusBar.style.color = textColor;
+        statusBar.style.display = 'block';
+        setTimeout(() => { statusBar.style.display = 'none'; }, 4000);
     }
 
-    function showStatus(msg, bg, color) {
-        const bar = document.getElementById('status-bar');
-        bar.innerText = msg; bar.style.backgroundColor = bg; bar.style.color = color;
-        bar.style.display = 'block'; setTimeout(() => bar.style.display = 'none', 3000);
-    }
-
-    function clearTextAll() {
+    function clearAll() {
         document.getElementById('plainText').value = '';
         document.getElementById('encryptedText').value = '';
-        document.getElementById('textPass').value = '';
-        document.getElementById('textHint').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('hintInput').value = '';
+        document.getElementById('hintInput').readOnly = false;
+        document.getElementById('hintToggle').checked = false;
+        isWrongPasswordEntered = false;
+        extractedHint = "";
     }
 
-    function copyTextResult() {
-        const el = document.getElementById('encryptedText');
-        el.select(); document.execCommand('copy');
-    }
-
-    // --- IMAGE MODULE LOGIC (Original Code Integrations) ---
-    let imageFiles = [], encryptedFiles = [], imgHintsVisible = false;
-
-    function updateProgress(percent, text) {
-        document.getElementById('progressBar').style.width = percent + "%";
-        document.getElementById('progressPercent').innerText = percent + "%";
-        document.getElementById('progressText').innerText = "Status: " + text;
-    }
-
-    async function processFiles(isEncrypt) {
-        const pass = document.getElementById(isEncrypt ? 'imgEncPass' : 'imgDecPass').value;
-        if (!pass) return alert("পাসওয়ার্ড দিন!");
-        
-        const files = isEncrypt ? imageFiles : encryptedFiles;
-        if (!files.length) return;
-        
-        const zip = new JSZip();
-        let processedCount = 0;
-
-        for (let file of files) {
-            if (isEncrypt) {
-                const hint = btoa(unescape(encodeURIComponent(document.getElementById('imgEncHint').value || "####")));
-                file.output = CryptoJS.AES.encrypt(file.src, pass).toString() + "::" + hint;
-                file.status = 'secure';
-                zip.file(file.name + ".enc", file.output);
-            } else {
-                try {
-                    const parts = file.data.split("::");
-                    const decrypted = CryptoJS.AES.decrypt(parts[0], pass).toString(CryptoJS.enc.Utf8);
-                    if (!decrypted.startsWith('data:image')) throw new Error();
-                    file.status = 'accessible';
-                    file.unlockedSrc = decrypted;
-                    zip.file(file.name.replace(".enc",""), dataURLtoBlob(decrypted));
-                } catch (e) {
-                    file.status = 'locked';
-                    document.getElementById('imgHintToggle').disabled = false;
-                }
-            }
-            processedCount++;
-            updateProgress(Math.round((processedCount/files.length)*100), isEncrypt ? "Encrypting..." : "Decrypting...");
+    function copyResult() {
+        const encryptedText = document.getElementById('encryptedText');
+        if (encryptedText.value) {
+            encryptedText.select();
+            document.execCommand('copy');
+            showStatus("Copied to clipboard!", "#d1ecf1", "#0c5460");
         }
-
-        if (isEncrypt) setupZipDownload('downloadEncZip', zip, "images_secure.zip", true);
-        else setupZipDownload('downloadDecZip', zip, "images_unlocked.zip", false);
-        
-        refreshImgUI(isEncrypt ? 'enc' : 'dec');
-    }
-
-    function refreshImgUI(mode) {
-        const gallery = document.getElementById('galleryGrid');
-        gallery.innerHTML = '';
-        if (mode === 'enc') {
-            const list = document.getElementById('fileList');
-            list.innerHTML = "";
-            imageFiles.forEach((f, i) => {
-                const row = document.createElement('div');
-                row.className = "flex justify-between p-1 border-b border-slate-700 text-[10px]";
-                row.innerHTML = `<span>${i+1}. ${f.name}</span> <span class="text-blue-400">${f.status}</span>`;
-                list.appendChild(row);
-                if(f.status !== 'secure') addThumb(f.src);
-            });
-            document.getElementById('encCount').innerText = "Files: " + imageFiles.length;
-        } else {
-            const list = document.getElementById('decFileList');
-            list.innerHTML = "";
-            encryptedFiles.forEach((f, i) => {
-                let hintText = (imgHintsVisible && f.status === 'locked') ? " [Hint: "+decodeURIComponent(escape(atob(f.data.split("::")[1])))+"]" : "";
-                const row = document.createElement('div');
-                row.className = "p-1 border-b border-slate-700 text-[10px]";
-                row.innerHTML = `<span>${i+1}. ${f.name}${hintText}</span>`;
-                if(f.status === 'accessible') {
-                    row.className += " text-green-400 cursor-pointer";
-                    row.onclick = () => showImg(f.unlockedSrc);
-                    addThumb(f.unlockedSrc);
-                }
-                list.appendChild(row);
-            });
-            document.getElementById('decCount').innerText = "Files: " + encryptedFiles.length;
-        }
-    }
-
-    function setupZipDownload(id, zip, name, isEnc) {
-        const btn = document.getElementById(id);
-        btn.disabled = false;
-        btn.className = isEnc ? "bg-blue-600 text-white px-4 py-2 rounded text-xs flex-1" : "bg-green-600 text-white px-4 py-2 rounded text-xs flex-1";
-        btn.onclick = async () => {
-            const blob = await zip.generateAsync({type:"blob"});
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = name; link.click();
-        };
-    }
-
-    function addThumb(src) {
-        const t = document.createElement('div');
-        t.className = "thumb-mini";
-        t.innerHTML = `<img src="${src}" class="w-full h-full object-cover">`;
-        t.onclick = () => showImg(src);
-        document.getElementById('galleryGrid').appendChild(t);
-    }
-
-    function showImg(src) {
-        document.getElementById('mainPreview').innerHTML = `<img src="${src}">`;
-    }
-
-    document.getElementById('encInput').addEventListener('change', e => {
-        Array.from(e.target.files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = ev => { imageFiles.push({name: file.name, src: ev.target.result, status: 'pending'}); refreshImgUI('enc'); };
-            reader.readAsDataURL(file);
-        });
-    });
-
-    document.getElementById('decInput').addEventListener('change', e => {
-        Array.from(e.target.files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = ev => { encryptedFiles.push({name: file.name, data: ev.target.result, status: 'locked'}); refreshImgUI('dec'); };
-            reader.readAsText(file);
-        });
-    });
-
-    function toggleImgHints() {
-        imgHintsVisible = true; refreshImgUI('dec');
-        setTimeout(() => { imgHintsVisible = false; document.getElementById('imgHintToggle').checked = false; refreshImgUI('dec'); }, 5000);
-    }
-
-    function dataURLtoBlob(d) {
-        let s = d.split(','), m = s[0].match(/:(.*?);/)[1], b = atob(s[1]), n = b.length, u = new Uint8Array(n);
-        while(n--) u[n] = b.charCodeAt(n); return new Blob([u], {type:m});
     }
 </script>
 
